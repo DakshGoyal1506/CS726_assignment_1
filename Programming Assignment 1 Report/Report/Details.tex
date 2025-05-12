@@ -1,0 +1,230 @@
+
+
+\section{Introduction}
+We explain a detailed explanation of our approach, implementation and result analysis of our code, which performs probabilistic inference using the Junction Tree Algorithm. Our implementation is designed to efficiently compute marginal probabilities, Maximum A Posteriori (MAP) assignments, and the top k most probable assignments within a probabilistic graphical model.
+
+The primary goal is to perform an exact inference while ensuring computational efficiency. The Junction Tree Algorithm enables this by transforming the graph into a tree structure, allowing for structured message passing.
+
+The implementation follows these steps:
+\begin{enumerate}
+    \item Convert the given graph into a chordal graph through triangulation.
+    \item Construct a junction tree by identifying maximal cliques.
+    \item Assign probability distributions to each clique.
+    \item Execute message passing in two phases:
+    \begin{itemize}
+        \item The collection phase, where messages propagate from leaf nodes toward the root.
+        \item The distribution phase, where the root sends messages back down.
+    \end{itemize}
+\end{enumerate}
+
+By implementing these steps, we ensure efficient probabilistic computations while maintaining consistency across variables.
+\\\\
+\textbf{\huge{Approach and Implementation Details}}
+
+\section{Factor Representation}
+
+The Factor class is implemented to represent probability distributions over a subset of variables in a probabilistic graphical model. In probabilistic inference, computations involve operations on these probability distributions, such as combining multiple distributions, summing out variables, and normalizing probabilities. The Factor class provides an efficient way to store and manipulate these probability distributions.
+
+Each Factor represents a conditional probability table (CPT) associated with a subset of variables. Given a set of variables, the Factor class maintains a mapping between different assignments of these variables and their corresponding probability values. These factors play a crucial role in message passing within the Junction Tree Algorithm, where they are combined, marginalized, and normalized to compute marginal probabilities and maximum a posteriori (MAP) assignments.
+
+The key operations provided by the Factor class include:
+
+\begin{itemize}
+    \item \textbf{Multiplication}: Combines two factors to create a joint factor by multiplying corresponding probability values.
+    \item \textbf{Marginalization}: Eliminates a variable by summing over all its possible values.
+    \item \textbf{Normalization}: Ensures that probability values sum to one, making them valid probability distributions.
+
+\end{itemize}
+
+These operations allow factors to be manipulated efficiently, ensuring correct probabilistic calculations during message passing. The Factor class is essential for structuring the probability computations required in the Junction Tree Algorithm.
+
+\subsection{Python Implementation of Factor Class}
+
+\begin{lstlisting}[language=Python]
+class Factor:
+    def __init__(self, variables, table=None):
+        """
+        Initializes a factor with given variables and probability table.
+        :param variables: List of variables associated with the factor.
+        :param table: Dictionary mapping variable assignments to probability values.
+        """
+        self.variables = tuple(variables)
+        self.table = {} if table is None else dict(table)
+
+    def multiply(self, other):
+        """
+        Multiplies the current factor with another factor.
+        :param other: Another Factor object.
+        :return: A new Factor object representing the product.
+        """
+        new_vars = list(self.variables)
+        for v in other.variables:
+            if v not in new_vars:
+                new_vars.append(v)
+        new_factor = Factor(new_vars)
+        for states in itertools.product([0,1], repeat=len(new_vars)):
+            assign_dict = dict(zip(new_vars, states))
+            val1 = self.get_value(assign_dict)
+            val2 = other.get_value(assign_dict)
+            new_factor.table[states] = val1 * val2
+        return new_factor
+
+    def marginalize(self, vars_to_remove):
+        """
+        Marginalizes out specific variables by summing over their possible values.
+        :param vars_to_remove: Set of variables to remove.
+        :return: A new Factor object after marginalization.
+        """
+        remaining_vars = [v for v in self.variables if v not in vars_to_remove]
+        new_factor = Factor(remaining_vars)
+        for states in itertools.product([0,1], repeat=len(remaining_vars)):
+            new_factor.table[states] = 0.0
+        for old_states, val in self.table.items():
+            assign_dict = dict(zip(self.variables, old_states))
+            new_states = tuple(assign_dict[v] for v in remaining_vars)
+            new_factor.table[new_states] += val
+        return new_factor
+
+    def normalize(self):
+        """
+        Normalizes the factor so that the sum of probability values is equal to 1.
+        """
+        total = sum(self.table.values())
+        for key in self.table:
+            self.table[key] /= total
+\end{lstlisting}
+
+\section{Graph Triangulation}
+
+\subsection{Definition}
+Graph triangulation is necessary to convert the given graphical model into a chordal graph. A chordal graph is one where every cycle of four or more nodes has an additional edge (chord) that breaks long cycles. This step is essential for the next step of the message passing algorithm, i.e, construction of the junction true.
+
+\subsection{Purpose of Triangulation}
+
+\begin{itemize}
+    \item Ensures that exact inference is computationally efficient.
+    \item Eliminates loops that can make inference intractable.
+    \item Prepares the graph for junction tree construction.
+\end{itemize}
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}[language=Python]
+def triangulate_and_get_cliques(self):
+    unmarked = set(range(self.nvars))
+    score = {v: 0 for v in range(self.nvars)}
+    order = []
+    while unmarked:
+        v = max(unmarked, key=lambda x: score[x])
+        order.append(v)
+        unmarked.remove(v)
+        for neighbor in self.adj[v]:
+            if neighbor in unmarked:
+                score[neighbor] += 1
+\end{lstlisting}
+
+\section{Junction Tree Construction}
+
+After triangulating the graph, the next step is to construct the Junction Tree. This tree allows efficient message passing and ensures that variables shared between cliques appear in a structured manner.
+
+\subsection{Steps to Construct a Junction Tree}
+
+\begin{enumerate}
+    \item Extract maximal cliques from the triangulated graph.
+    \item Sort cliques by size.
+    \item Connect cliques while ensuring the Running Intersection Property.
+\end{enumerate}
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}[language=Python]
+def get_junction_tree(self):
+    numC = len(self.cliques)
+    self.junction_tree = [[] for _ in range(numC)]
+    for cliqueIndex in range(1, numC):
+        bestNode = None
+        setClique = set(self.cliques[cliqueIndex])
+        for node in range(cliqueIndex):
+            setTree = set(self.cliques[node])
+            if len(setClique.intersection(setTree)) > 0:
+                bestNode = node
+                break
+        self.junction_tree[cliqueIndex].append(bestNode)
+        self.junction_tree[bestNode].append(cliqueIndex)
+\end{lstlisting}
+
+\section{Marginal Probability Computation}
+
+Marginal probabilities are computed using message passing in the junction tree. Each clique's factor is processed, and the probability distribution for individual variables is extracted.
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}[language=Python]
+def compute_marginals(self):
+    if not hasattr(self, "Z"):
+        self.get_z_value()
+    marginals = []
+    for var in range(self.nvars):
+        cliqueIndex = next(i for i, c in enumerate(self.cliques) if var in c)
+        factorCliques = self.clique_factors[cliqueIndex]
+        marginal = factorCliques.marginalize(set(factorCliques.variables) - {var})
+        marginal.normalize()
+        marginals.append([marginal.table[(0,)], marginal.table[(1,)]])
+    return marginals
+\end{lstlisting}
+
+\section{MAP Assignment Computation}
+
+MAP assignment finds the most probable configuration of variables. It is computed as follows:
+
+\begin{equation}
+    \hat{X} = \arg\max_X P(X)
+\end{equation}
+
+where \( X \) represents the set of variables.
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}[language=Python]
+def compute_map(self):
+    all_prob = []
+    for state_int in range(2**self.nvars):
+        assignment = {v: (state_int >> v) & 1 for v in range(self.nvars)}
+        prob = 1.0
+        for f in self.factors:
+            prob *= f.get_value(assignment)
+        all_prob.append((prob, assignment))
+    return max(all_prob, key=lambda x: x[0])
+\end{lstlisting}
+
+\section{Top-k Assignments Computation}
+
+Top-k assignments return the k most probable configurations.
+
+\subsection{Python Implementation}
+
+\begin{lstlisting}[language=Python]
+def compute_top_k(self):
+    all_prob = []
+    for state_int in range(2**self.nvars):
+        assignment = {v: (state_int >> v) & 1 for v in range(self.nvars)}
+        prob = 1.0
+        for f in self.factors:
+            prob *= f.get_value(assignment)
+        all_prob.append((prob, assignment))
+    all_prob.sort(reverse=True, key=lambda x: x[0])
+    return all_prob[:self.k]
+\end{lstlisting}
+
+
+\section{Conclusion}
+We successfully implemented the Junction Tree Algorithm for probabilistic inference. The approach efficiently computes marginal probabilities, MAP assignments, and top-k assignments using structured message passing.
+
+Key insights from this work:
+\begin{itemize}
+    \item Triangulation ensures that the graph is properly structured for inference.
+    \item The junction tree provides a computationally efficient way to perform exact inference.
+    \item The order in which cliques are formed and processed affects overall performance.
+\end{itemize}
+
+

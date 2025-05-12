@@ -1,0 +1,195 @@
+\documentclass[12pt]{article}
+%% Useful packages
+% \usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6.5in, 8.5in}]{geometry}
+\usepackage{crop,graphicx,amsmath,array,color,amssymb,fancyhdr,lineno}
+\usepackage{flushend,stfloats,amsthm,chngpage,times,,lipsum,lastpage} 
+\usepackage{calc,color,wrapfig,tabularx,longtable,enumitem}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[section]{placeins}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{pgffor}
+\usepackage{calc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+
+% \usepackage{zip}
+% \zipunpack{Main/q1}{}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue ,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={EE765 : Assignment 3},
+    pdfpagemode=FullScreen,
+    }
+
+\urlstyle{same}
+% \hypersetup{
+%     colorlinks,
+%     citecolor=black,
+%     filecolor=black,
+%     linkcolor=black,
+%     urlcolor=black
+% }
+\usepackage{listings}
+\usepackage{xcolor} % for coloring code
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+\definecolor{keywords}{rgb}{0.58,0.0,0.82}
+\definecolor{comments}{rgb}{0.0,0.6,0.0}
+\definecolor{strings}{rgb}{0.63,0.0,0.63}
+
+\lstdefinestyle{python}{
+    language=Python,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{keywords},
+    commentstyle=\color{comments},
+    stringstyle=\color{strings},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    breaklines=true,
+    showstringspaces=false,
+    frame=single,
+    captionpos=b
+}
+\usepackage{amsmath}
+
+% Package for including images and graphics
+\usepackage{graphicx}
+
+% Package for handling source code listings
+\usepackage{listings}
+
+% Package for adding clickable hyperlinks in the document
+\usepackage{hyperref}
+
+% Package for handling colors in listings (for code highlighting)
+\usepackage{xcolor}
+
+% Package for improved font encoding
+% \usepackage[T1]{fontenc}
+
+% Package for setting font type and encoding
+% \usepackage[utf8]{inputenc}
+
+% Package for using fancy formatting and titles
+\usepackage{titlesec}
+
+% Package for better tables
+\usepackage{booktabs}
+
+% Package for multi-line cells in tables
+\usepackage{array}
+
+% Package for handling verbatim text and code blocks
+\usepackage{verbatim}
+
+% Package for improved page layout control
+\usepackage[a4paper, margin=1in]{geometry}
+
+% Package for better handling of figures
+\usepackage{float}
+
+% Package for supporting subfigures
+\usepackage{subcaption}
+
+% Package for defining the JSON language in listings
+\usepackage{listingsutf8}  % Provides UTF-8 encoding support for listings
+
+% Define JSON as a language for listings
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily,
+    numbers=left,
+    numberstyle=\small,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    string=[s]{"}{"},
+    morestring=[s]{"}{"},
+    identifierstyle=\color{black},
+    stringstyle=\color{blue}
+}
+
+% Define Python settings for listings
+\lstdefinestyle{PythonStyle}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1
+}
+
+\usepackage[style=numeric-comp,backend=biber]{biblatex}
+\addbibresource{Refs.bib}
+\usepackage{lineno}
+%%%%%%%%%%%%   Header and Footer  %%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancypagestyle{plain}{%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhf{}%
+}
+
+\title{%
+  Project Title \\
+  \large Subtitle}
+\author{Rahul Choudhary}
+
+\begin{document}
+\input{Title/title.tex}
+
+\sffamily
+
+\fancyhf{}
+\fancyhead[L]{CS726 Assignment 1}
+\fancyhead[R]{}
+\fancyfoot[R]{ \bf\thepage\ \rm }%
+
+
+
+\newpage
+\tableofcontents
+% \listoffigures
+% \listoftables
+
+\include{Nomenclature.tex}
+
+\input{Report/Details}
+%\input{Main/q3/q3}
+% Appendix
+%\newpage
+%\appendix
+%\section{Appendix: Python Code}
+%This section contains the code that I used in order to solve question 1 and 2. In[1] contains the code for question 1 and In[2] and In[3] both contains code for question 2 with some minor change they have.\\\\
+
+%\lstinputlisting[style=python]%%{Main/Appendix/EE765_ASSIGNMENT2.py}
+
+% \newpage
+% \appendix
+% \section{Appendix: Python Code}
+% This section contains the code that I used in order to solve the assignment 3. \\\\
+
+% \lstinputlisting[style=python]{Main/Appendix/EE765_ASSIGNMENT3.py}
+
+\pagebreak
+% \printbibliography[heading=bibnumbered]
+% \input{Appendix/Appendix.tex}
+
+\end{document}
